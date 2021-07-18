@@ -49,9 +49,9 @@ func SetupHandlers(c *Controller) {
 			noti.GET("num", c.GetNotificationNum)
 			noti.GET("", c.GetNotifications)
 		}
-		admin := api.Group("/admin", model.GeneralAdmin)
+		admin := api.Group("/admin")
 		{
-			admin.POST("indexblogs", c.IndexAllBlogs)
+			admin.POST("index", c.IndexAll)
 		}
 		uploads := api.Group("", model.OrdinaryUser)
 		{
@@ -101,7 +101,7 @@ func SetupHandlers(c *Controller) {
 			find := blogs.Group("/find")
 			{
 				find.GET("own", c.FindBlogsByUser, model.OrdinaryUser)
-				find.GET("userId", c.FindBlogsByUserId)
+				find.GET("", c.FindBlogsByID)
 				find.GET("id", c.FindBlogById)
 			}
 		}
@@ -115,6 +115,7 @@ func SetupHandlers(c *Controller) {
 			accounts.POST("logout", c.LogoutAccount)
 			accounts.GET("detail/:id", c.ShowAccount)
 			accounts.GET("listBrief", c.ListAccountsInfo)
+			accounts.GET("", adapter.ReAdapterWithUinfo(c.SearchAccount))
 		}
 		comment := api.Group("/comment", model.Anonymous, model.OrdinaryUser)
 		{
@@ -134,10 +135,11 @@ func SetupHandlers(c *Controller) {
 			group.GET(":id", c.FindGroup)
 
 		}
-		proj := api.Group("project", model.OrdinaryUser)
+		proj := api.Group("project")
 		{
-			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject))
+			proj.POST("", adapter.ReAdapterWithUinfo(c.UpsertProject), model.OrdinaryUser)
 			proj.GET("", adapter.ReAdapterWithUinfo(c.ListProject))
+			proj.DELETE(":id", adapter.ReAdapterWithUinfo(c.DeleteProject), model.OrdinaryUser)
 			proj.GET(":id", adapter.ReAdapterWithUinfo(c.GetProject))
 		}
 	}
